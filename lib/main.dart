@@ -21,17 +21,43 @@ class TaskFlowApp extends StatelessWidget {
   }
 }
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
+  State<WelcomeScreen> createState() => _MutableWelcomeScreenState();
+}
+
+class _MutableWelcomeScreenState extends State<WelcomeScreen> {
+  int pendingTasks = 3;
+  int completedTasks = 0;
+  static const dailyGoal = 5;
+  final String studentName = 'Isaac';
+
+  void _addTask() {
+    setState(() {
+      pendingTasks++;
+    });
+  }
+
+  void _completeTask() {
+    if (pendingTasks == 0) {
+      return;
+    }
+
+    setState(() {
+      pendingTasks--;
+      if (completedTasks < dailyGoal) {
+        completedTasks++;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const studentName = 'Isaac';
-    const pendintTasks = 2;
-    const courseName = 'Desarrollo de aplicaciones móviles';
-    const motivationalMessage =
-        'No tienes que ser grande para empezar, pero tienes que empezar para ser grande';
-    const messageAuthor = 'Zig Ziglar';
+    final statusMessage = pendingTasks == 0
+        ? '!Excelenete! No tienes tareas pendientes.'
+        : 'Aún tienes tareas por organizar.';
 
     return Scaffold(
       appBar: AppBar(title: const Text('TaskFlow'), centerTitle: true),
@@ -40,17 +66,15 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.check_circle_outline, size: 50),
-            const SizedBox(height: 24),
             Text(
-              '¡Hola, $studentName!',
+              '!Hola, $studentName!',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 12),
-            Text('"$motivationalMessage" - $messageAuthor'),
+            Text(statusMessage),
             const SizedBox(height: 12),
-            Text('Bienvenido/a a $courseName'),
-            const SizedBox(height: 32),
+            Text('Completadas hoy: $completedTasks de $dailyGoal'),
+            const SizedBox(height: 28),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -58,10 +82,27 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.pending_actions),
                     const SizedBox(width: 12),
-                    Text('Tareas pendientes: $pendintTasks'),
+                    Text('Tareas pendientes: $pendingTasks'),
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _addTask,
+                  label: const Text('Agregar tarea'),
+                  icon: const Icon(Icons.add),
+                ),
+                OutlinedButton.icon(
+                  onPressed: pendingTasks == 0 ? null : _completeTask,
+                  icon: const Icon(Icons.done),
+                  label: const Text('Completar una tarea'),
+                ),
+              ],
             ),
           ],
         ),
